@@ -36,6 +36,7 @@ asr, tokenizer, classifier, label_names, generator = load_models()
 
 def predict_intent(text):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=32)
+    inputs.pop("token_type_ids", None)
     with torch.no_grad():
         logits = classifier(**inputs).logits
     probs = torch.softmax(logits, dim=1)[0]
