@@ -47,9 +47,29 @@ def predict_intent(text):
     return label_names[idx], confidence
 
 
+import random
+
+FALLBACK_TEMPLATES = [
+    "Sure, I can help you with {intent_label}. Let me look into that.",
+    "Got it — checking on {intent_label} for you now.",
+    "I can assist with {intent_label}. Here's what I found.",
+    "On it. Handling your {intent_label} request now.",
+]
+
+
+def is_echo(output, text, threshold=0.6):
+    output_words = set(output.lower().split())
+    text_words = set(text.lower().split())
+    if not text_words:
+        return False
+    overlap = len(output_words & text_words) / len(text_words)
+    return overlap >= threshold
+
+
 def generate_response(intent, text):
     if intent == "oos":
         return "Sorry, I did not understand that. Could you rephrase it?"
+
     intent_label = intent.replace("_", " ")
     prompt = f"Reply helpfully and concisely to this message about {intent_label}: {text}"
     output = generator(
@@ -59,8 +79,11 @@ def generate_response(intent, text):
         temperature=0.7,
         top_p=0.9,
         no_repeat_ngram_size=3,
-    )[0]["generated_text"]
-    return output.strip()
+    )[0]["generated_text"].strip()
+
+    if not output or is_echo(output, text):
+        return random.choice(FALLBACK_TEMPLATES).format(intent_label=intent_label)
+    return output
 
 
 audio = st.audio_input("Record your question")
@@ -71,7 +94,10 @@ if audio is not None:
         audio_array = audio_array.mean(axis=1)
 
     with st.spinner("Transcribing..."):
-        transcript = asr({"array": audio_array, "sampling_rate": sample_rate})["text"].strip()
+        transcript = asr(
+            {"array": audio_array, "sampling_rate": sample_rate},
+            generate_kwargs={"language": "en", "task": "transcribe"},
+        )["text"].strip()
 
     st.subheader("You said")
     st.write(transcript)
