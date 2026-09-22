@@ -1,1 +1,8 @@
 streamlit
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+transformers
+soundfile
+librosa
+huggingface_hub
+sentencepiece
