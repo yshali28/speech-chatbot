@@ -123,7 +123,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-audio = st.audio_input("Record your question")
+audio = st.audio_input("")
 
 if audio is not None:
     audio_id = audio.getbuffer().nbytes
