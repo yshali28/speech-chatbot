@@ -9,9 +9,9 @@ from huggingface_hub import hf_hub_download
 MODEL_REPO = "yshali28/speech-trained-distilbert"
 CONFIDENCE_THRESHOLD = 0.5
 
-st.set_page_config(page_title="Voice Chatbot")
+st.set_page_config(page_title="Voice Chatbot", page_icon="🎙️", layout="centered")
 st.title("Voice-Enabled Chatbot")
-st.write("Record a question. The app transcribes it, figures out the intent, and replies.")
+st.caption("Record a question below — it gets transcribed, classified, and answered.")
 
 
 @st.cache_resource
@@ -91,8 +91,12 @@ if "messages" not in st.session_state:
 if "last_audio_id" not in st.session_state:
     st.session_state.last_audio_id = None
 
+if not st.session_state.messages:
+    st.info("No messages yet — record a question below to start the conversation.")
+
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    avatar = "🧑" if message["role"] == "user" else "🎙️"
+    with st.chat_message(message["role"], avatar=avatar):
         st.write(message["content"])
         if message["role"] == "assistant":
             st.caption(f"Detected intent: {message['intent']} ({message['confidence']:.2f} confidence)")
