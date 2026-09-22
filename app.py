@@ -55,10 +55,10 @@ def generate_response(intent, text):
     output = generator(
         prompt,
         max_new_tokens=40,
-        num_beams=4,
+        do_sample=True,
+        temperature=0.7,
+        top_p=0.9,
         no_repeat_ngram_size=3,
-        repetition_penalty=1.3,
-        early_stopping=True,
     )[0]["generated_text"]
     return output.strip()
 
