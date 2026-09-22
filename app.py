@@ -1,10 +1,10 @@
 import io
 import json
 
+import numpy as np
 import streamlit as st
-import soundfile as sf
+import av
 import torch
-from pydub import AudioSegment
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from huggingface_hub import hf_hub_download
 
@@ -90,6 +90,21 @@ def generate_response(intent, text):
     return output
 
 
+def decode_audio(audio_bytes):
+    container = av.open(io.BytesIO(audio_bytes))
+    stream = container.streams.audio[0]
+    resampler = av.AudioResampler(format="s16", layout="mono")
+
+    chunks = []
+    for frame in container.decode(stream):
+        for resampled in resampler.resample(frame):
+            chunks.append(resampled.to_ndarray())
+    container.close()
+
+    audio_array = np.concatenate(chunks, axis=1).flatten().astype(np.float32) / 32768.0
+    return audio_array, stream.rate
+
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "last_audio_id" not in st.session_state:
@@ -135,14 +150,7 @@ if audio_bytes is not None:
     if audio_id != st.session_state.last_audio_id:
         st.session_state.last_audio_id = audio_id
 
-        segment = AudioSegment.from_file(io.BytesIO(audio_bytes), format="webm")
-        wav_io = io.BytesIO()
-        segment.export(wav_io, format="wav")
-        wav_io.seek(0)
-
-        audio_array, sample_rate = sf.read(wav_io)
-        if audio_array.ndim > 1:
-            audio_array = audio_array.mean(axis=1)
+        audio_array, sample_rate = decode_audio(audio_bytes)
 
         with st.spinner("Transcribing..."):
             transcript = asr(
