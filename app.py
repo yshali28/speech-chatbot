@@ -26,7 +26,7 @@ def load_models():
     with open(label_path) as f:
         label_names = json.load(f)
 
-    generator = pipeline("text2text-generation", model="google/flan-t5-small")
+    generator = pipeline("text2text-generation", model="google/flan-t5-base")
 
     return asr, tokenizer, classifier, label_names, generator
 
@@ -53,7 +53,8 @@ def generate_response(intent, text):
     intent_label = intent.replace("_", " ")
     prompt = (
         f"You are a helpful assistant. The user's request is about {intent_label}. "
-        f'Write one short, clear sentence responding to: "{text}"'
+        f'Answer directly in one short sentence. Do not repeat the question. '
+        f'Request: "{text}"'
     )
     output = generator(
         prompt,
