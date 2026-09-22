@@ -51,11 +51,7 @@ def generate_response(intent, text):
     if intent == "oos":
         return "Sorry, I did not understand that. Could you rephrase it?"
     intent_label = intent.replace("_", " ")
-    prompt = (
-        f"You are a helpful assistant. The user's request is about {intent_label}. "
-        f'Answer directly in one short sentence. Do not repeat the question. '
-        f'Request: "{text}"'
-    )
+    prompt = f"Reply helpfully and concisely to this message about {intent_label}: {text}"
     output = generator(
         prompt,
         max_new_tokens=40,
