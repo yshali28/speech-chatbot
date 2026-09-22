@@ -101,6 +101,28 @@ for message in st.session_state.messages:
         if message["role"] == "assistant":
             st.caption(f"Detected intent: {message['intent']} ({message['confidence']:.2f} confidence)")
 
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding-bottom: 8rem;
+    }
+    div[data-testid="stAudioInput"] {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 736px;
+        margin: 0 auto;
+        padding: 1rem;
+        background-color: var(--background-color);
+        z-index: 999;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 audio = st.audio_input("Record your question")
 
 if audio is not None:
