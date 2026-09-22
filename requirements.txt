@@ -1,7 +1,7 @@
 streamlit
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch
-transformers
+transformers<5
 soundfile
 librosa
 huggingface_hub
