@@ -93,7 +93,7 @@ def generate_response(intent, text):
 def decode_audio(audio_bytes):
     container = av.open(io.BytesIO(audio_bytes))
     stream = container.streams.audio[0]
-    resampler = av.AudioResampler(format="s16", layout="mono")
+    resampler = av.AudioResampler(format="s16", layout="mono", rate=16000)
 
     chunks = []
     for frame in container.decode(stream):
@@ -102,7 +102,7 @@ def decode_audio(audio_bytes):
     container.close()
 
     audio_array = np.concatenate(chunks, axis=1).flatten().astype(np.float32) / 32768.0
-    return audio_array, stream.rate
+    return audio_array, 16000
 
 
 if "messages" not in st.session_state:
