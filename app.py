@@ -86,28 +86,46 @@ def generate_response(intent, text):
     return output
 
 
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "last_audio_id" not in st.session_state:
+    st.session_state.last_audio_id = None
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
+        if message["role"] == "assistant":
+            st.caption(f"Detected intent: {message['intent']} ({message['confidence']:.2f} confidence)")
+
 audio = st.audio_input("Record your question")
 
 if audio is not None:
-    audio_array, sample_rate = sf.read(audio)
-    if audio_array.ndim > 1:
-        audio_array = audio_array.mean(axis=1)
+    audio_id = audio.getbuffer().nbytes
 
-    with st.spinner("Transcribing..."):
-        transcript = asr(
-            {"array": audio_array, "sampling_rate": sample_rate},
-            generate_kwargs={"language": "en", "task": "transcribe"},
-        )["text"].strip()
+    if audio_id != st.session_state.last_audio_id:
+        st.session_state.last_audio_id = audio_id
 
-    st.subheader("You said")
-    st.write(transcript)
+        audio_array, sample_rate = sf.read(audio)
+        if audio_array.ndim > 1:
+            audio_array = audio_array.mean(axis=1)
 
-    intent, confidence = predict_intent(transcript)
+        with st.spinner("Transcribing..."):
+            transcript = asr(
+                {"array": audio_array, "sampling_rate": sample_rate},
+                generate_kwargs={"language": "en", "task": "transcribe"},
+            )["text"].strip()
 
-    with st.spinner("Generating response..."):
-        reply = generate_response(intent, transcript)
+        intent, confidence = predict_intent(transcript)
 
-    st.subheader("Chatbot response")
-    st.write(reply)
+        with st.spinner("Generating response..."):
+            reply = generate_response(intent, transcript)
 
-    st.caption(f"Detected intent: {intent} ({confidence:.2f} confidence)")
+        st.session_state.messages.append({"role": "user", "content": transcript})
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": reply,
+            "intent": intent,
+            "confidence": confidence,
+        })
+
+        st.rerun()
