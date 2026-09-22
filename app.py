@@ -124,17 +124,20 @@ st.markdown(
     """
     <style>
     .block-container {
-        padding-bottom: 8rem;
+        padding-bottom: 8rem !important;
+    }
+    section[data-testid="stMain"],
+    div[data-testid="stAppViewBlockContainer"] {
+        transform: none !important;
     }
     div[data-testid="stCustomComponentV1"] {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
         max-width: 736px;
-        margin: 0 auto;
-        padding: 1rem;
-        background-color: var(--background-color);
+        margin: 0 auto !important;
+        padding: 0.75rem 1rem;
         z-index: 999;
     }
     </style>

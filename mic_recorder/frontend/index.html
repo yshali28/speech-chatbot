@@ -3,10 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <style>
+  :root {
+    --st-bg: #ffffff;
+    --st-secondary-bg: #f0f2f6;
+    --st-primary: #ff4b4b;
+    --st-text: #31333f;
+    --st-font: -apple-system, "Segoe UI", sans-serif;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-family: var(--st-font);
     background: transparent;
   }
 
@@ -15,21 +23,20 @@
     align-items: center;
     height: 52px;
     border-radius: 26px;
-    background: #f0f0f2;
-    border: 1px solid #e0e0e3;
+    background: var(--st-secondary-bg);
+    border: 1px solid color-mix(in srgb, var(--st-text) 15%, transparent);
     padding: 0 6px 0 16px;
     box-sizing: border-box;
     overflow: hidden;
   }
 
   .bar.recording {
-    background: #fdeeee;
-    border-color: #f5c6c6;
+    border-color: color-mix(in srgb, var(--st-primary) 45%, transparent);
   }
 
   .timer {
     font-size: 14px;
-    color: #444;
+    color: var(--st-text);
     min-width: 44px;
     opacity: 0;
     transform: translateX(-8px);
@@ -59,7 +66,7 @@
     width: 3px;
     height: 8px;
     border-radius: 2px;
-    background: #e05353;
+    background: var(--st-primary);
     animation: pulse 0.9s ease-in-out infinite;
   }
 
@@ -78,7 +85,8 @@
   .hint {
     flex: 1;
     font-size: 14px;
-    color: #888;
+    color: var(--st-text);
+    opacity: 0.6;
   }
 
   .bar.recording .hint {
@@ -95,7 +103,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #4a4af0;
+    background: var(--st-primary);
     transition: background 0.2s ease;
   }
 
@@ -109,7 +117,7 @@
 
   .status {
     font-size: 12px;
-    color: #b33;
+    color: #e05353;
     margin-top: 4px;
     padding-left: 16px;
     min-height: 14px;
@@ -148,6 +156,23 @@
   function setFrameHeight() {
     sendToStreamlit("streamlit:setFrameHeight", { height: document.body.scrollHeight + 10 });
   }
+
+  function applyTheme(theme) {
+    if (!theme) return;
+    const root = document.documentElement.style;
+    if (theme.backgroundColor) root.setProperty("--st-bg", theme.backgroundColor);
+    if (theme.secondaryBackgroundColor) root.setProperty("--st-secondary-bg", theme.secondaryBackgroundColor);
+    if (theme.primaryColor) root.setProperty("--st-primary", theme.primaryColor);
+    if (theme.textColor) root.setProperty("--st-text", theme.textColor);
+    if (theme.font) root.setProperty("--st-font", theme.font);
+  }
+
+  window.addEventListener("message", (event) => {
+    const data = event.data;
+    if (data && data.type === "streamlit:render") {
+      applyTheme(data.theme);
+    }
+  });
 
   sendToStreamlit("streamlit:componentReady", { apiVersion: 1 });
   window.addEventListener("load", setFrameHeight);
