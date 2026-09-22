@@ -50,9 +50,20 @@ def predict_intent(text):
 def generate_response(intent, text):
     if intent == "oos":
         return "Sorry, I did not understand that. Could you rephrase it?"
-    prompt = f"The user's intent is {intent}. Write a short helpful reply to: {text}"
-    result = generator(prompt, max_new_tokens=40)[0]["generated_text"]
-    return result
+    intent_label = intent.replace("_", " ")
+    prompt = (
+        f"You are a helpful assistant. The user's request is about {intent_label}. "
+        f'Write one short, clear sentence responding to: "{text}"'
+    )
+    output = generator(
+        prompt,
+        max_new_tokens=40,
+        num_beams=4,
+        no_repeat_ngram_size=3,
+        repetition_penalty=1.3,
+        early_stopping=True,
+    )[0]["generated_text"]
+    return output.strip()
 
 
 audio = st.audio_input("Record your question")
