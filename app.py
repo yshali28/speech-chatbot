@@ -4,6 +4,7 @@ import json
 import streamlit as st
 import soundfile as sf
 import torch
+from pydub import AudioSegment
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from huggingface_hub import hf_hub_download
 
@@ -134,7 +135,12 @@ if audio_bytes is not None:
     if audio_id != st.session_state.last_audio_id:
         st.session_state.last_audio_id = audio_id
 
-        audio_array, sample_rate = sf.read(io.BytesIO(audio_bytes))
+        segment = AudioSegment.from_file(io.BytesIO(audio_bytes), format="webm")
+        wav_io = io.BytesIO()
+        segment.export(wav_io, format="wav")
+        wav_io.seek(0)
+
+        audio_array, sample_rate = sf.read(wav_io)
         if audio_array.ndim > 1:
             audio_array = audio_array.mean(axis=1)
 

@@ -6,3 +6,4 @@ soundfile
 librosa
 huggingface_hub
 sentencepiece
+pydub
