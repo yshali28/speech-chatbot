@@ -1,3 +1,4 @@
+import io
 import json
 
 import streamlit as st
@@ -5,6 +6,8 @@ import soundfile as sf
 import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from huggingface_hub import hf_hub_download
+
+from mic_recorder import record_audio
 
 MODEL_REPO = "yshali28/speech-trained-distilbert"
 CONFIDENCE_THRESHOLD = 0.5
@@ -107,7 +110,7 @@ st.markdown(
     .block-container {
         padding-bottom: 8rem;
     }
-    div[data-testid="stAudioInput"] {
+    div[data-testid="stCustomComponentV1"] {
         position: fixed;
         bottom: 0;
         left: 0;
@@ -123,15 +126,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-audio = st.audio_input("")
+audio_bytes = record_audio()
 
-if audio is not None:
-    audio_id = audio.getbuffer().nbytes
+if audio_bytes is not None:
+    audio_id = len(audio_bytes)
 
     if audio_id != st.session_state.last_audio_id:
         st.session_state.last_audio_id = audio_id
 
-        audio_array, sample_rate = sf.read(audio)
+        audio_array, sample_rate = sf.read(io.BytesIO(audio_bytes))
         if audio_array.ndim > 1:
             audio_array = audio_array.mean(axis=1)
 
