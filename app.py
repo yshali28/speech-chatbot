@@ -19,7 +19,7 @@ SUGGESTION_PROMPTS = [
     "Turn the lights on in the garage.",
     "Can you get me a table for 2 at 7pm?",
     "How do I say you're welcome in Chinese?",
-    "Please remove laundry from my list of chores.",
+    "How many chores are on my to-do list?",
     "Set my alarm for 6am tomorrow.",
     "Tell me something funny about cats.",
     "What did I spend on groceries this month?",
