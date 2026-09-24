@@ -13,7 +13,27 @@ from mic_recorder import record_audio
 MODEL_REPO = "yshali28/speech-trained-distilbert"
 CONFIDENCE_THRESHOLD = 0.5
 
-st.set_page_config(page_title="Voice Chatbot", page_icon="🎙️", layout="centered")
+# Real example utterances from the CLINC150 dataset (clinc/clinc_oos), one
+# per intent this model was trained on, for the "try saying" sidebar.
+SUGGESTION_PROMPTS = [
+    "What is the weather like in Sparks right now?",
+    "Can you get me a table for 2 at 7pm?",
+    "How do I say you're welcome in Chinese?",
+    "Find me round trip flights out of LAX to SFO.",
+    "Set my alarm for 6am tomorrow.",
+    "Tell me something funny about cats.",
+    "What did I spend on groceries this month?",
+    "How many calories are in a slice of pizza?",
+]
+
+# A sample of the intent categories the classifier recognizes.
+EXAMPLE_CATEGORIES = [
+    "weather", "restaurant_reservation", "translate", "book_flight",
+    "alarm", "tell_joke", "spending_history", "calories",
+    "todo_list", "directions", "recipe", "calendar",
+]
+
+st.set_page_config(page_title="Voice Chatbot", page_icon="🎙️", layout="wide")
 st.title("Voice-Enabled Chatbot")
 st.caption("Record a question below — it gets transcribed, classified, and answered.")
 
@@ -110,54 +130,67 @@ if "messages" not in st.session_state:
 if "last_audio_id" not in st.session_state:
     st.session_state.last_audio_id = None
 
-if not st.session_state.messages:
-    st.info("No messages yet — record a question below to start the conversation.")
+left_col, chat_col, right_col = st.columns([1, 2, 1], gap="medium")
 
-for message in st.session_state.messages:
-    avatar = "🧑" if message["role"] == "user" else "🎙️"
-    with st.chat_message(message["role"], avatar=avatar):
-        st.write(message["content"])
-        if message["role"] == "assistant":
-            st.caption(f"Detected intent: {message['intent']} ({message['confidence']:.2f} confidence)")
+with left_col:
+    st.markdown("#### Try saying")
+    for prompt in SUGGESTION_PROMPTS:
+        st.info(prompt)
 
-st.markdown(
-    """
-    <style>
-    .block-container {
-        padding-bottom: 8rem !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+with right_col:
+    st.markdown("#### Example categories")
+    for category in EXAMPLE_CATEGORIES:
+        st.markdown(f"- `{category}`")
 
-audio_bytes = record_audio()
+with chat_col:
+    if not st.session_state.messages:
+        st.info("No messages yet — record a question below to start the conversation.")
 
-if audio_bytes is not None:
-    audio_id = len(audio_bytes)
+    for message in st.session_state.messages:
+        avatar = "🧑" if message["role"] == "user" else "🎙️"
+        with st.chat_message(message["role"], avatar=avatar):
+            st.write(message["content"])
+            if message["role"] == "assistant":
+                st.caption(f"Detected intent: {message['intent']} ({message['confidence']:.2f} confidence)")
 
-    if audio_id != st.session_state.last_audio_id:
-        st.session_state.last_audio_id = audio_id
+    st.markdown(
+        """
+        <style>
+        .block-container {
+            padding-bottom: 8rem !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-        audio_array, sample_rate = decode_audio(audio_bytes)
+    audio_bytes = record_audio()
 
-        with st.spinner("Transcribing..."):
-            transcript = asr(
-                {"array": audio_array, "sampling_rate": sample_rate},
-                generate_kwargs={"language": "en", "task": "transcribe"},
-            )["text"].strip()
+    if audio_bytes is not None:
+        audio_id = len(audio_bytes)
 
-        intent, confidence = predict_intent(transcript)
+        if audio_id != st.session_state.last_audio_id:
+            st.session_state.last_audio_id = audio_id
 
-        with st.spinner("Generating response..."):
-            reply = generate_response(intent, transcript)
+            audio_array, sample_rate = decode_audio(audio_bytes)
 
-        st.session_state.messages.append({"role": "user", "content": transcript})
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": reply,
-            "intent": intent,
-            "confidence": confidence,
-        })
+            with st.spinner("Transcribing..."):
+                transcript = asr(
+                    {"array": audio_array, "sampling_rate": sample_rate},
+                    generate_kwargs={"language": "en", "task": "transcribe"},
+                )["text"].strip()
 
-        st.rerun()
+            intent, confidence = predict_intent(transcript)
+
+            with st.spinner("Generating response..."):
+                reply = generate_response(intent, transcript)
+
+            st.session_state.messages.append({"role": "user", "content": transcript})
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": reply,
+                "intent": intent,
+                "confidence": confidence,
+            })
+
+            st.rerun()
