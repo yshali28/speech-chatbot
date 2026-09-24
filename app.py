@@ -11,7 +11,7 @@ from huggingface_hub import hf_hub_download
 from mic_recorder import record_audio
 
 MODEL_REPO = "yshali28/speech-trained-distilbert"
-CONFIDENCE_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.4
 
 # Real example utterances from the CLINC150 dataset (clinc/clinc_oos), one
 # per intent this model was trained on, for the "try saying" sidebar.
