@@ -135,10 +135,8 @@ st.markdown(
         overflow: hidden !important;
     }
     .block-container {
-        padding-top: 1.5rem !important;
+        padding-top: 3.25rem !important;
         padding-bottom: 0.5rem !important;
-        max-height: 100vh;
-        overflow: hidden;
     }
     .app-header {
         text-align: center;
