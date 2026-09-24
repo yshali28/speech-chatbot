@@ -33,9 +33,7 @@ EXAMPLE_CATEGORIES = [
     "todo_list", "directions", "recipe", "calendar",
 ]
 
-st.set_page_config(page_title="Voice Chatbot", page_icon="🎙️", layout="wide")
-st.title("Voice-Enabled Chatbot")
-st.caption("Record a question below — it gets transcribed, classified, and answered.")
+st.set_page_config(page_title="Voice Assistant", page_icon="🎙️", layout="wide")
 
 
 @st.cache_resource
@@ -133,13 +131,43 @@ if "last_audio_id" not in st.session_state:
 st.markdown(
     """
     <style>
+    html, body {
+        overflow: hidden !important;
+    }
+    .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 0.5rem !important;
+        max-height: 100vh;
+        overflow: hidden;
+    }
+    .app-header {
+        text-align: center;
+        margin-bottom: 1.25rem;
+    }
+    .app-header h1 {
+        font-size: 1.9rem;
+        margin: 0;
+    }
+    .app-header p {
+        color: rgba(128, 128, 128, 0.9);
+        font-size: 0.95rem;
+        margin: 0.25rem 0 0 0;
+    }
+    .side-heading {
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: rgba(128, 128, 128, 0.9);
+        margin-bottom: 0.75rem;
+    }
     .suggestion-card {
         background: rgba(128, 128, 128, 0.08);
         border: 1px solid rgba(128, 128, 128, 0.15);
         border-radius: 10px;
-        padding: 10px 14px;
-        margin-bottom: 10px;
-        font-size: 14px;
+        padding: 9px 13px;
+        margin-bottom: 8px;
+        font-size: 13.5px;
         line-height: 1.4;
         color: inherit;
     }
@@ -154,6 +182,10 @@ st.markdown(
         color: inherit;
     }
     </style>
+    <div class="app-header">
+        <h1>🎙️ Voice Assistant</h1>
+        <p>Speak your question — I'll transcribe it, figure out what you mean, and reply.</p>
+    </div>
     """,
     unsafe_allow_html=True,
 )
@@ -161,20 +193,20 @@ st.markdown(
 left_col, chat_col, right_col = st.columns([1, 2, 1], gap="medium")
 
 with left_col:
-    st.markdown("#### Try saying")
+    st.markdown('<div class="side-heading">Try asking</div>', unsafe_allow_html=True)
     for prompt in SUGGESTION_PROMPTS:
         st.markdown(f'<div class="suggestion-card">{prompt}</div>', unsafe_allow_html=True)
 
 with right_col:
-    st.markdown("#### Example categories")
+    st.markdown('<div class="side-heading">What I can help with</div>', unsafe_allow_html=True)
     pills = "".join(f'<span class="category-pill">{c}</span>' for c in EXAMPLE_CATEGORIES)
     st.markdown(pills, unsafe_allow_html=True)
 
 with chat_col:
-    chat_box = st.container(height=520)
+    chat_box = st.container(height=380)
     with chat_box:
         if not st.session_state.messages:
-            st.info("No messages yet — record a question below to start the conversation.")
+            st.info("Tap the mic below and ask something to get started.")
 
         for message in st.session_state.messages:
             avatar = "🧑" if message["role"] == "user" else "🎙️"
