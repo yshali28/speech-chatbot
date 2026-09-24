@@ -16,7 +16,7 @@ CONFIDENCE_THRESHOLD = 0.5
 # Real example utterances from the CLINC150 dataset (clinc/clinc_oos), one
 # per intent this model was trained on, for the "try saying" sidebar.
 SUGGESTION_PROMPTS = [
-    "What is the weather like in Sparks right now?",
+    "Turn the lights on in the garage.",
     "Can you get me a table for 2 at 7pm?",
     "How do I say you're welcome in Chinese?",
     "Find me round trip flights out of LAX to SFO.",
