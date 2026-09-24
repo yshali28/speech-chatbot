@@ -22,6 +22,8 @@
     display: flex;
     align-items: center;
     height: 52px;
+    max-width: 85%;
+    margin: 0 auto;
     border-radius: 26px;
     background: var(--st-secondary-bg);
     border: 1px solid color-mix(in srgb, var(--st-text) 15%, transparent);
@@ -157,42 +159,6 @@
     sendToStreamlit("streamlit:setFrameHeight", { height: document.body.scrollHeight + 10 });
   }
 
-  // Pin the mic bar to the bottom of the outer app viewport. We don't
-  // rely on guessing Streamlit's internal wrapper class/testid names
-  // (those change across versions) - since this iframe is same-origin,
-  // we reach into window.frameElement directly and style the real
-  // wrapper element that Streamlit put around us.
-  function pinToBottom() {
-    try {
-      const frame = window.frameElement;
-      if (!frame) return;
-
-      frame.style.border = "none";
-      frame.style.display = "block";
-
-      let wrapper = frame.parentElement;
-      for (let i = 0; i < 3 && wrapper && wrapper.parentElement; i++) {
-        wrapper.style.position = "fixed";
-        wrapper.style.bottom = "0";
-        wrapper.style.left = "0";
-        wrapper.style.right = "0";
-        wrapper.style.maxWidth = "736px";
-        wrapper.style.width = "calc(100% - 2rem)";
-        wrapper.style.margin = "0 auto";
-        wrapper.style.padding = "0.75rem 0";
-        wrapper.style.zIndex = "999";
-        wrapper.style.background = "transparent";
-
-        const cs = window.getComputedStyle(wrapper);
-        if (cs.position === "fixed") break;
-        wrapper = wrapper.parentElement;
-      }
-    } catch (e) {
-      // Cross-origin or unavailable - silently skip; the bar will
-      // just render inline instead of pinned.
-    }
-  }
-
   function applyTheme(theme) {
     if (!theme) return;
     const root = document.documentElement.style;
@@ -207,15 +173,11 @@
     const data = event.data;
     if (data && data.type === "streamlit:render") {
       applyTheme(data.theme);
-      pinToBottom();
     }
   });
 
   sendToStreamlit("streamlit:componentReady", { apiVersion: 1 });
-  window.addEventListener("load", () => {
-    setFrameHeight();
-    pinToBottom();
-  });
+  window.addEventListener("load", setFrameHeight);
 
   const bar = document.getElementById("bar");
   const micBtn = document.getElementById("micBtn");

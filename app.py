@@ -130,39 +130,73 @@ if "messages" not in st.session_state:
 if "last_audio_id" not in st.session_state:
     st.session_state.last_audio_id = None
 
+st.markdown(
+    """
+    <style>
+    .suggestion-card {
+        background: rgba(128, 128, 128, 0.08);
+        border: 1px solid rgba(128, 128, 128, 0.15);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.4;
+        color: inherit;
+    }
+    .category-pill {
+        display: inline-block;
+        background: rgba(128, 128, 128, 0.08);
+        border: 1px solid rgba(128, 128, 128, 0.15);
+        border-radius: 999px;
+        padding: 4px 12px;
+        margin: 0 6px 8px 0;
+        font-size: 13px;
+        color: inherit;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 left_col, chat_col, right_col = st.columns([1, 2, 1], gap="medium")
 
 with left_col:
     st.markdown("#### Try saying")
     for prompt in SUGGESTION_PROMPTS:
-        st.info(prompt)
+        st.markdown(f'<div class="suggestion-card">{prompt}</div>', unsafe_allow_html=True)
 
 with right_col:
     st.markdown("#### Example categories")
-    for category in EXAMPLE_CATEGORIES:
-        st.markdown(f"- `{category}`")
+    pills = "".join(f'<span class="category-pill">{c}</span>' for c in EXAMPLE_CATEGORIES)
+    st.markdown(pills, unsafe_allow_html=True)
 
 with chat_col:
-    if not st.session_state.messages:
-        st.info("No messages yet — record a question below to start the conversation.")
+    chat_box = st.container(height=520)
+    with chat_box:
+        if not st.session_state.messages:
+            st.info("No messages yet — record a question below to start the conversation.")
 
-    for message in st.session_state.messages:
-        avatar = "🧑" if message["role"] == "user" else "🎙️"
-        with st.chat_message(message["role"], avatar=avatar):
-            st.write(message["content"])
-            if message["role"] == "assistant":
-                st.caption(f"Detected intent: {message['intent']} ({message['confidence']:.2f} confidence)")
+        for message in st.session_state.messages:
+            avatar = "🧑" if message["role"] == "user" else "🎙️"
+            with st.chat_message(message["role"], avatar=avatar):
+                st.write(message["content"])
+                if message["role"] == "assistant":
+                    st.caption(f"Detected intent: {message['intent']} ({message['confidence']:.2f} confidence)")
 
-    st.markdown(
-        """
-        <style>
-        .block-container {
-            padding-bottom: 8rem !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+        st.markdown('<div id="chat-bottom"></div>', unsafe_allow_html=True)
+
+    if st.session_state.messages:
+        st.components.v1.html(
+            """
+            <script>
+            try {
+                var el = window.parent.document.getElementById("chat-bottom");
+                if (el) { el.scrollIntoView({ block: "end" }); }
+            } catch (e) {}
+            </script>
+            """,
+            height=0,
+        )
 
     audio_bytes = record_audio()
 
